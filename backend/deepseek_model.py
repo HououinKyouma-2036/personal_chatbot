@@ -4,6 +4,7 @@ import openai
 from openai import OpenAI
 from dotenv import load_dotenv
 
+# this is model part for deepseek r1
 # Load environment variables from .env file
 load_dotenv()
 
