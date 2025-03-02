@@ -46,40 +46,54 @@ def get_response_from_deepseek(messages, model="deepseek-reasoner"):
     )
     return response
 
-def get_streaming_response_from_deepseek(messages, model="deepseek-reasoner", stream=True):
+def get_streaming_response_from_deepseek(messages, model="deepseek-reasoner", stream=True, bot_role=""):
     """
     Calls the DeepSeek API with streaming enabled and yields chunks of the response.
     
     :param messages: A list of message dictionaries (each with 'role' and 'content').
     :param model: The model to use (default is "deepseek-reasoner").
     :param stream: Whether to stream the response (default is True).
+    :param bot_role: Optional role for the bot (e.g., "a coding expert").
     :return: If stream=True, yields JSON chunks. If stream=False, returns the complete response.
     """
     if not DEEPSEEK_API_KEY:
         raise ValueError("DeepSeek API key not found. Please set the DEEPSEEK_API_KEY environment variable.")
     
-    # Add a system message to encourage proper LaTeX and Markdown formatting
+    # Create the system message with LaTeX formatting instructions and bot role if provided
+    system_content = """When responding with mathematical content, please use proper LaTeX notation:
+- For inline math, use single dollar signs: $E=mc^2$
+- For display math, use double dollar signs: $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
+
+Format your response in markdown for better readability:
+- Use # for headings
+- Use **bold** and *italic* for emphasis
+- Use - or * for bullet points
+- Use 1. 2. 3. for numbered lists
+- Use > for blockquotes
+- Use `code` for inline code
+- Use ```language\\ncode\\n``` for code blocks
+
+Ensure all LaTeX expressions are properly escaped and formatted."""
+
+    # Add the bot role if provided
+    if bot_role:
+        system_content = f"You are {bot_role}. {system_content}"
+    
     system_message = {
         "role": "system",
-        "content": """When responding with mathematical content, please use proper LaTeX notation:
-        - For inline math, use single dollar signs: $E=mc^2$
-        - For display math, use double dollar signs: $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
-        
-        Format your response in markdown for better readability:
-        - Use # for headings
-        - Use **bold** and *italic* for emphasis
-        - Use - or * for bullet points
-        - Use 1. 2. 3. for numbered lists
-        - Use > for blockquotes
-        - Use `code` for inline code
-        - Use ```language\\ncode\\n``` for code blocks
-        
-        Ensure all LaTeX expressions are properly escaped and formatted."""
+        "content": system_content
     }
     
     # Add the system message if not already present
     if not any(msg.get("role") == "system" for msg in messages):
         messages = [system_message] + messages
+    # If there's already a system message but we have a bot role, update it
+    elif bot_role and any(msg.get("role") == "system" for msg in messages):
+        for msg in messages:
+            if msg.get("role") == "system":
+                if "You are" not in msg["content"]:
+                    msg["content"] = f"You are {bot_role}. {msg['content']}"
+                break
     
     if not stream:
         # If streaming is not requested, use the regular function

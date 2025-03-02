@@ -56,6 +56,8 @@ const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [botRole, setBotRole] = useState('');
+  const [roleSelected, setRoleSelected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -73,6 +75,14 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Handle role selection
+  const handleRoleSelect = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!botRole.trim()) return;
+    
+    setRoleSelected(true);
+  };
+
   // Sends conversation history (messages array) to the backend.
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +96,7 @@ const App: React.FC = () => {
 
     try {
       console.log("Sending request to backend...");
+      console.log("Bot role being sent:", botRole);
       const apiUrl = 'http://127.0.0.1:5000/api/chat';
       console.log("API URL:", apiUrl);
       
@@ -116,7 +127,8 @@ const App: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: cleanedMessages,
-          stream: true
+          stream: true,
+          botRole: botRole // Send the bot role to the backend
         })
       });
       
@@ -250,62 +262,110 @@ const App: React.FC = () => {
         <h1>DeepSeek Reasoner Chatbot</h1>
       </header>
       
-      <div className="messages-container">
-        {messages.length === 0 && (
-          <div className="welcome-message">
-            <h2>Welcome to DeepSeek Reasoner!</h2>
-            <p>Ask me anything, and I'll provide both an answer and my reasoning process.</p>
+      {!roleSelected ? (
+        <div className="role-selection-container">
+          <h2>Choose a role for your AI assistant</h2>
+          <p>Define what kind of expert you want the AI to be</p>
+          <form onSubmit={handleRoleSelect} className="role-form">
+            <input
+              type="text"
+              value={botRole}
+              onChange={e => setBotRole(e.target.value)}
+              placeholder="e.g., 'a coding expert', 'a math tutor', 'a science advisor'"
+              className="role-input"
+            />
+            <button
+              type="submit"
+              className="role-button"
+            >
+              Start Chat
+            </button>
+          </form>
+          <div className="role-examples">
+            <p>Suggested roles:</p>
+            <div className="role-chips">
+              <button onClick={() => setBotRole("a coding expert")} className="role-chip">Coding Expert</button>
+              <button onClick={() => setBotRole("a math tutor")} className="role-chip">Math Tutor</button>
+              <button onClick={() => setBotRole("a science advisor")} className="role-chip">Science Advisor</button>
+              <button onClick={() => setBotRole("a history professor")} className="role-chip">History Professor</button>
+            </div>
           </div>
-        )}
-        
-        {messages.map((msg, index) => (
-          <div 
-            key={index} 
-            className={`message ${msg.role === 'user' ? 'user-message' : 'assistant-message'} ${msg.isStreaming ? 'streaming' : ''}`}
-          >
-            <div className="message-header">
-              <strong>{msg.role === 'user' ? 'You' : 'DeepSeek'}</strong>
-              {msg.isStreaming && <span className="streaming-indicator">Thinking...</span>}
-            </div>
-            <div className="message-content">
-              {renderMessageContent(msg.content)}
-              {msg.isStreaming && <span className="cursor"></span>}
-            </div>
-            {msg.role === 'assistant' && msg.reasoning_content && (
-              <div className="reasoning-content">
-                <details open={msg.isStreaming}>
-                  <summary>
-                    {msg.isStreaming ? 'Reasoning in progress...' : 'View Reasoning'}
-                  </summary>
-                  <div className="reasoning-text">
-                    {renderMessageContent(msg.reasoning_content)}
-                    {msg.isStreaming && <span className="cursor"></span>}
-                  </div>
-                </details>
+        </div>
+      ) : (
+        <>
+          <div className="current-role">
+            <span>Current role: <strong>{botRole}</strong></span>
+            <button 
+              onClick={() => setRoleSelected(false)} 
+              className="change-role-button"
+              disabled={loading}
+            >
+              Change Role
+            </button>
+          </div>
+          
+          <div className="messages-container">
+            {messages.length === 0 && (
+              <div className="welcome-message">
+                <h2>Welcome to DeepSeek Reasoner!</h2>
+                <p>I'm your {botRole}. Ask me anything, and I'll provide both an answer and my reasoning process.</p>
               </div>
             )}
+            
+            {messages.map((msg, index) => (
+              <div 
+                key={index} 
+                className={`message ${msg.role === 'user' ? 'user-message' : 'assistant-message'} ${msg.isStreaming ? 'streaming' : ''}`}
+              >
+                <div className="message-header">
+                  <strong>{msg.role === 'user' ? 'You' : 'DeepSeek'}</strong>
+                  {msg.isStreaming && <span className="streaming-indicator">Thinking...</span>}
+                </div>
+                
+                {/* Show reasoning first for assistant messages */}
+                {msg.role === 'assistant' && msg.reasoning_content && (
+                  <div className="reasoning-content">
+                    <details open={msg.isStreaming}>
+                      <summary>
+                        {msg.isStreaming ? 'Reasoning in progress...' : 'View Reasoning'}
+                      </summary>
+                      <div className="reasoning-text">
+                        {renderMessageContent(msg.reasoning_content)}
+                        {msg.isStreaming && <span className="cursor"></span>}
+                      </div>
+                    </details>
+                  </div>
+                )}
+                
+                {/* Show main content after reasoning */}
+                <div className="message-content">
+                  {renderMessageContent(msg.content)}
+                  {msg.isStreaming && <span className="cursor"></span>}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      
-      <form onSubmit={handleSend} className="input-form">
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Type your message..."
-          disabled={loading}
-          className="message-input"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="send-button"
-        >
-          {loading ? 'Thinking...' : 'Send'}
-        </button>
-      </form>
+          
+          <form onSubmit={handleSend} className="input-form">
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Type your message..."
+              disabled={loading}
+              className="message-input"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="send-button"
+            >
+              {loading ? 'Thinking...' : 'Send'}
+            </button>
+          </form>
+        </>
+      )}
     </div>
   );
 };

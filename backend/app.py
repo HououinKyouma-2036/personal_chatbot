@@ -42,6 +42,10 @@ def chat():
         # Clean and validate the messages
         clean_messages = data["messages"]
         
+        # Get the bot role if provided
+        bot_role = data.get("botRole", "")
+        print(f"Bot role received: {bot_role}")
+        
         # Check if streaming is requested (default to True)
         stream = data.get("stream", True)
         
@@ -53,7 +57,7 @@ def chat():
             def generate():
                 try:
                     # Get a streaming response from the model
-                    for chunk in get_streaming_response_from_deepseek(clean_messages):
+                    for chunk in get_streaming_response_from_deepseek(clean_messages, bot_role=bot_role):
                         # Convert the chunk to a JSON string and yield it
                         yield f"data: {chunk}\n\n"
                 except Exception as e:
@@ -67,7 +71,7 @@ def chat():
         else:
             # Non-streaming response (original implementation)
             print("Non-streaming response requested")
-            response = get_streaming_response_from_deepseek(clean_messages, stream=False)
+            response = get_streaming_response_from_deepseek(clean_messages, stream=False, bot_role=bot_role)
             
             # Extract the final answer (content) and the reasoning chain
             assistant_message = response.choices[0].message
@@ -81,7 +85,6 @@ def chat():
                 "content": final_content,
                 "reasoning_content": reasoning_chain
             })
-    
     except Exception as e:
         print(f"Error processing request: {str(e)}")
         # In case of errors from the API call, return the error message
