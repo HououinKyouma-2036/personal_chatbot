@@ -1,3 +1,15 @@
+
+ ___       _______   ________  ________  ___  ___  ________          ________  ___     
+|\  \     |\  ___ \ |\   __  \|\   ____\|\  \|\  \|\   __  \        |\   __  \|\  \    
+\ \  \    \ \   __/|\ \  \|\  \ \  \___|\ \  \\\  \ \  \|\  \       \ \  \|\  \ \  \   
+ \ \  \    \ \  \_|/_\ \  \\\  \ \  \  __\ \  \\\  \ \  \\\  \       \ \   __  \ \  \  
+  \ \  \____\ \  \_|\ \ \  \\\  \ \  \|\  \ \  \\\  \ \  \\\  \       \ \  \ \  \ \  \ 
+   \ \_______\ \_______\ \_______\ \_______\ \_______\ \_______\       \ \__\ \__\ \__\
+    \|_______|\|_______|\|_______|\|_______|\|_______|\|_______|        \|__|\|__|\|__|
+                                                                                       
+                                                                                       
+                                                                                       
+
 # DeepSeek Reasoner Chatbot
 
 A full-stack web application that provides an interactive chat interface powered by the DeepSeek Reasoner AI model. This application allows users to define a specific role for the AI assistant and engage in conversations with detailed reasoning capabilities.
