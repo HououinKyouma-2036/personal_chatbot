@@ -1,9 +1,3 @@
- L       EEEEE   OOO   GGGGG    AAAAA   III  
- L       E      O   O  G        A     A   I   
- L       EEEE   O   O  G  GG    AAAAAAA   I   
- L       E      O   O  G   G    A     A   I   
- LLLLL   EEEEE   OOO   GGGGG    A     A  III  
-
 # DeepSeek Reasoner Chatbot
 
 A full-stack web application that provides an interactive chat interface powered by the DeepSeek Reasoner AI model. This application allows users to define a specific role for the AI assistant and engage in conversations with detailed reasoning capabilities.
