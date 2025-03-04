@@ -195,9 +195,10 @@ body {
 }
 
 /* Input form */
-.input-form {
+.input-container {
   display: flex;
-  gap: 10px;
+  flex: 1;
+  position: relative;
 }
 
 .message-input {
@@ -208,6 +209,12 @@ body {
   font-size: 16px;
   outline: none;
   transition: border-color 0.2s;
+  resize: none; /* Disable manual resizing */
+  overflow-y: auto; /* Enable scrolling for very long content */
+  line-height: 1.5;
+  font-family: inherit; /* Use the same font as the rest of the app */
+  min-height: 24px; /* Minimum height for single line */
+  max-height: 200px; /* Maximum height before scrolling */
 }
 
 .message-input:focus {
@@ -215,6 +222,40 @@ body {
   box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
 }
 
+/* Update the input form to handle the textarea and button layout */
+.input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Position the image upload button inside the textarea container */
+.image-upload-button {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: none;
+  border: none;
+  color: #718096;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.image-upload-button:hover {
+  color: #2b6cb0;
+}
+
+.image-upload-button:disabled {
+  color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+/* Adjust the send button to align with the new layout */
 .send-button {
   padding: 12px 24px;
   background-color: #2b6cb0;
@@ -224,6 +265,7 @@ body {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s;
+  align-self: flex-end; /* Align to the right */
 }
 
 .send-button:hover {

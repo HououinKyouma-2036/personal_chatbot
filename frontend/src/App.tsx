@@ -60,6 +60,9 @@ const App: React.FC = () => {
   const [roleSelected, setRoleSelected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -256,6 +259,18 @@ const App: React.FC = () => {
     });
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    // Handle paste event
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Handle image selection
+  };
+
+  const handleRemoveImage = (index: number) => {
+    // Handle image removal
+  };
+
   return (
     <div className="chat-container">
       <header className="chat-header">
@@ -348,20 +363,70 @@ const App: React.FC = () => {
           </div>
           
           <form onSubmit={handleSend} className="input-form">
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="Type your message..."
-              disabled={loading}
-              className="message-input"
-            />
+            <div className="input-container">
+              <textarea
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onPaste={handlePaste}
+                placeholder="Type your message..."
+                disabled={loading}
+                className="message-input"
+                rows={1}
+                onInput={(e) => {
+                  // Auto-resize the textarea based on content
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  const newHeight = Math.min(200, target.scrollHeight); // Max height of 200px
+                  target.style.height = `${newHeight}px`;
+                }}
+              />
+              <button
+                type="button"
+                className="image-upload-button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </button>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                onChange={handleImageSelect}
+                multiple
+                style={{ display: 'none' }}
+              />
+            </div>
+            
+            {/* Image previews */}
+            {previewImages.length > 0 && (
+              <div className="image-preview-container">
+                {previewImages.map((url, index) => (
+                  <div key={index} className="image-preview">
+                    <img src={url} alt={`Preview ${index}`} />
+                    <button 
+                      type="button" 
+                      className="remove-image-button"
+                      onClick={() => handleRemoveImage(index)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
             <button
               type="submit"
-              disabled={loading}
               className="send-button"
+              disabled={loading || (!input.trim() && selectedImages.length === 0)}
             >
-              {loading ? 'Thinking...' : 'Send'}
+              {loading ? 'Sending...' : 'Send'}
             </button>
           </form>
         </>

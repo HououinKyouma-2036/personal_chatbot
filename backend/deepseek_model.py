@@ -41,8 +41,8 @@ def get_response_from_deepseek(messages, model="deepseek-reasoner"):
         
     response = client.chat.completions.create(
         model=model,
-        messages=messages
-        # You can optionally add parameters like max_tokens here.
+        messages=messages,
+        max_tokens=20000  # Increase max tokens to 20K
     )
     return response
 
@@ -103,7 +103,8 @@ Ensure all LaTeX expressions are properly escaped and formatted."""
     response_stream = client.chat.completions.create(
         model=model,
         messages=messages,
-        stream=True
+        stream=True,
+        max_tokens=8192  # Increase max tokens to 20K
     )
     
     # Initialize variables to accumulate content and reasoning
