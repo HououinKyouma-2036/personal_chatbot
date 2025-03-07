@@ -208,13 +208,14 @@ body {
   border-radius: 8px;
   font-size: 16px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, height 0.1s;
   resize: none; /* Disable manual resizing */
   overflow-y: auto; /* Enable scrolling for very long content */
   line-height: 1.5;
   font-family: inherit; /* Use the same font as the rest of the app */
   min-height: 24px; /* Minimum height for single line */
   max-height: 200px; /* Maximum height before scrolling */
+  height: 24px; /* Initial height - single line */
 }
 
 .message-input:focus {
@@ -380,12 +381,20 @@ body {
   border-collapse: collapse;
   width: 100%;
   margin-bottom: 16px;
+  overflow-x: auto;
+  display: block; /* Makes tables scrollable on small screens */
 }
 
 .markdown-content table th,
 .markdown-content table td {
-  padding: 6px 13px;
+  padding: 8px 13px;
   border: 1px solid #dfe2e5;
+  text-align: left;
+}
+
+.markdown-content table th {
+  background-color: #f6f8fa;
+  font-weight: 600;
 }
 
 .markdown-content table tr {

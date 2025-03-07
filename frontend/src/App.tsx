@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -219,11 +220,11 @@ const App: React.FC = () => {
     
     return parts.map((part, index) => {
       if (part.type === 'text') {
-        // Use ReactMarkdown with math plugins for text parts
+        // Use ReactMarkdown with math plugins and GFM for text parts
         return (
           <div key={index} className="markdown-content">
             <ReactMarkdown
-              remarkPlugins={[remarkMath]}
+              remarkPlugins={[remarkMath, remarkGfm]}
               rehypePlugins={[rehypeKatex]}
             >
               {part.content}
@@ -269,6 +270,18 @@ const App: React.FC = () => {
 
   const handleRemoveImage = (index: number) => {
     // Handle image removal
+  };
+
+  // Handle key press in the input field
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // If Enter is pressed without Shift, send the message
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevent default behavior (new line)
+      if (input.trim() || selectedImages.length > 0) {
+        handleSend(e as unknown as React.FormEvent);
+      }
+    }
+    // If Shift+Enter is pressed, allow new line (default behavior)
   };
 
   return (
@@ -368,6 +381,7 @@ const App: React.FC = () => {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onPaste={handlePaste}
+                onKeyDown={handleKeyPress}
                 placeholder="Type your message..."
                 disabled={loading}
                 className="message-input"
@@ -376,7 +390,7 @@ const App: React.FC = () => {
                   // Auto-resize the textarea based on content
                   const target = e.target as HTMLTextAreaElement;
                   target.style.height = 'auto';
-                  const newHeight = Math.min(200, target.scrollHeight); // Max height of 200px
+                  const newHeight = Math.min(200, Math.max(24, target.scrollHeight)); // Min height of 24px, max of 200px
                   target.style.height = `${newHeight}px`;
                 }}
               />
